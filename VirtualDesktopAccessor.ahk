@@ -22,28 +22,28 @@ OnExplorerRestart(wParam, lParam, msg, hwnd) {
     DllCall(RestartVirtualDesktopAccessorProc, UInt, result)
 }
 
-;   StepToDesktop(steps, moveActive)
-;     steps: number of desktops to move, negative left, positive right. Wraps.
-;     moveActive : send active window to the desktop before switching to it
+; StepToDesktop(steps, moveActive)
+;   steps: number of desktops to move, negative left, positive right. Wraps.
+;   moveActive : send active window to the desktop before switching to it
 StepToDesktop(steps, moveActive) {
-	global MoveWindowToDesktopNumberProc, GoToDesktopNumberProc, GetCurrentDesktopNumberProc, GetDesktopCountProc
-	d_current := DllCall(GetCurrentDesktopNumberProc, UInt)
+  global MoveWindowToDesktopNumberProc, GoToDesktopNumberProc, GetCurrentDesktopNumberProc, GetDesktopCountProc
+  d_current := DllCall(GetCurrentDesktopNumberProc, UInt)
   d_count := DllCall(GetDesktopCountProc, UInt)
   d_next := Mod(d_current + steps, d_count)
   If (d_next < 0) {
     d_next := d_count + d_next
   }
   If (moveActive) {
-	  WinGet, activeHwnd, ID, A
-	  DllCall(MoveWindowToDesktopNumberProc, UInt, activeHwnd, UInt, d_next)
+    WinGet, activeHwnd, ID, A
+    DllCall(MoveWindowToDesktopNumberProc, UInt, activeHwnd, UInt, d_next)
   }
-	DllCall(GoToDesktopNumberProc, UInt, d_next)
+  DllCall(GoToDesktopNumberProc, UInt, d_next)
 }
 
 ; Toggles Pinned status of active window
 TogglePinnedWindow() {
   global IsPinnedWindowProc, PinWindowProc, UnPinWindowProc
-	WinGet, activeHwnd, ID, A
+  WinGet, activeHwnd, ID, A
   isPinned := DllCall(IsPinnedWindowProc, UInt, activeHwnd)
   If (isPinned == 0) {
     DllCall(PinWindowProc, UInt, activeHwnd)
