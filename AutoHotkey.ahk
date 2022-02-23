@@ -107,10 +107,16 @@ IsPointerOverTray()
 }
 
 
-; === Virtual desktop switch on mouse 4-5 over task bar
+; === Virtual desktop switch on mouse 4-5 and wheel up/down over task bar
 #If IsPointerOverTaskBar()
-$XButton1::StepToDesktop(-1, False) 
-$XButton2::StepToDesktop(1, False) 
+$WheelUp::
+$XButton1::
+  StepToDesktop(-1, False) 
+Return
+$WheelDown::
+$XButton2::
+  StepToDesktop(1, False) 
+Return
 
 IsPointerOverTaskBar() 
 {
