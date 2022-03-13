@@ -19,7 +19,7 @@ explorerRestartMsg := DllCall("user32\RegisterWindowMessage", "Str", "TaskbarCre
 OnMessage(explorerRestartMsg, "OnExplorerRestart")
 OnExplorerRestart(wParam, lParam, msg, hwnd) {
     global RestartVirtualDesktopAccessorProc
-    DllCall(RestartVirtualDesktopAccessorProc, UInt, result)
+    DllCall(RestartVirtualDesktopAccessorProc)
 }
 
 ; StepToDesktop(steps, moveActive)
