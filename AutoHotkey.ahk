@@ -22,6 +22,9 @@ DetectHiddenWindows, On
 ; Remove and comment out #Warn?
 space_to_click := False
 
+; Run every 250, will not reenter so function will be always active practically 
+SetTimer, CloseSndvolOnInactivate
+
 ; Disable contexts for Hotkeys, both those defined by :: syntax and Hotkey method. Place context sensitive hotkeys
 ; below the non-context sensitive in the script.
 HotKey, If
@@ -91,6 +94,19 @@ $+^#Right::StepToDesktop(1, True)
 Return
 SendClick:
   Send {Click}
+Return
+
+
+; === Open sndvol.exe with Shift-Win-g. 
+; Inspired by XBox Game Overlay (Win-g), but will start the sndvol.exe app and close it when
+; it loses focus. 
+; Loop wait for an active window that is deactivated and close it. Will work reliably however
+; the app is started....
+$^#g::Run sndvol.exe
+CloseSndvolOnInactivate:
+  WinWaitActive, ahk_exe SndVol.exe
+  WinWaitNotActive, ahk_exe SndVol.exe
+  WinClose
 Return
 
 
