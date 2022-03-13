@@ -67,19 +67,19 @@ $CapsLock::Esc
 
 ; === Virtual Desktop mods.
 ; Makes it so one can move windows between desktops with simple keyboard shortcuts
-;   * First remaps Win-Left / Win-Right from snap window left / right to swith to desktop left / right
-;   * Then makes Ctrl-Win-Left / Ctrl-Win-Right bring currently active window when switching desktop
+;   * Ctrl-Win-Left / Ctrl-Win-Right swith to desktop left / right
+;   * Adding Shift sends currently active window to the destination desktop before switching to it
 ;
 ; 2022: Migrated to using VirtualDesktopAccessor.dll
 ;   StepToDesktop(steps, moveActive)
 ;     steps: number of desktops to move, negative left, positive right. Wraps.
 ;     moveActive : send active window to the desktop before switching to it
-$#Left::StepToDesktop(-1, False)
-$#Right::StepToDesktop(1, False)
-$^#Left::StepToDesktop(-1, True)
-$^#Right::StepToDesktop(1, True) 
- 
- 
+$^#Left::StepToDesktop(-1, False)
+$^#Right::StepToDesktop(1, False)
+$+^#Left::StepToDesktop(-1, True)
+$+^#Right::StepToDesktop(1, True)
+
+
 ; === Optionally Remaps Space to Click (left mouse button), toggle with Shift-F1
 ; On first invocation, create hotkey (check for existence). On consequent toggle it off/on
 +F1::
@@ -135,3 +135,4 @@ IsPointerOverTaskBar()
   WinGet,taskbarid,ID,ahk_class Shell_TrayWnd
   return windowsid==taskbarid
 }
+
