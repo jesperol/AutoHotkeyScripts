@@ -19,9 +19,6 @@ SetWorkingDir %A_ScriptDir%
 
 DetectHiddenWindows, On
 
-; Remove and comment out #Warn?
-space_to_click := False
-
 ; Run every 250, will not reenter so function will be always active practically 
 SetTimer, CloseSndvolOnInactivate
 
@@ -29,18 +26,6 @@ SetTimer, CloseSndvolOnInactivate
 ; below the non-context sensitive in the script.
 HotKey, If
 #If
-
-; === Quick-Open volume mixer
-; Win-G XBoxGameBar...
-;
-; ms-settings:apps-volume
-; sndvol.exe
-; EarTrumpet
-;
-; ms-settings:apps-volume is incomprehensibly slow to open and bloated interface if you only want the volume
-; sliders. sndvol.exe has about the right features. As does the GameBar, which funnily opens its whole overlay
-; faster than the ms-settings app... Like the temporary overlay thing...
-
 
 ; === VirtualDesktopAccessor.dll, Calls and Functions
 ; imports TogglePinnedWindow() and StepToDesktop(steps, moveActive)
@@ -51,22 +36,18 @@ HotKey, If
 +CapsLock::CapsLock
 $CapsLock::Esc
 
-
 ; === Open Notebook Directory in Code (Shift-Alt-n)
-+!n::Run, code.cmd ., C:\Users\mignon\OneDrive\Documents\Notes
-
-
-; === Toggle "Pinned" (display on all desktops) window status
-; In case the move to virtual desktop script fscks it...toggle it back manually
-!F2::TogglePinnedWindow()
-
++!n::Run, code.exe ., C:\Users\mignon\OneDrive\Documents\Notes
 
 ; === Toggle AlwaysOnTop
 ; Let's make Alt-F3 toggle active window's "AlwaysOnTop" property (wtf, they have one but it is not
 ; changeable through the window menu's or button's? Made this simpler than I anticipated... Alt-F3
 ; easily rememberred as next to Alt-F4 and never use it for something else.
-!F3::Winset,Alwaysontop,,A
+; User PowerToy instead that higlights the window as well
+; !F3::Winset,Alwaysontop,,A
 
+; === TogglePinnedWindow
+!F2::TogglePinnedWindow()
 
 ; === Virtual Desktop mods.
 ; Makes it so one can move windows between desktops with simple keyboard shortcuts
@@ -77,6 +58,8 @@ $CapsLock::Esc
 ;   StepToDesktop(steps, moveActive)
 ;     steps: number of desktops to move, negative left, positive right. Wraps.
 ;     moveActive : send active window to the desktop before switching to it
+;
+; Ctrl-Mod <- -> now natively switches desktops, keep only because our wraps...  
 $^#Left::StepToDesktop(-1, False)
 $^#Right::StepToDesktop(1, False)
 $+^#Left::StepToDesktop(-1, True)
@@ -84,7 +67,13 @@ $+^#Right::StepToDesktop(1, True)
 
 
 ; === Optionally Remaps Space to Click (left mouse button), toggle with Shift-F1
-; On first invocation, create hotkey (check for existence). On consequent toggle it off/on
+; On first invocation, create hotkey (check for existence). On consequent toggle it off/on.
+; The HotKey 2:nd param being either the special keyword "Toggle" or empty or a Label makes
+; this pretty readable. 
+
+; On Shift-F1 check if hotkey Shift-Space is defined, else define it as "SendClick:". If defined 
+; toggle it on/off. Originally for "Space to spin" function emulation for those games that ltacked
+; that option. Seems to work with e.g. ELK / NYX games, but not Leander's for some reason. 
 +F1::
   Hotkey, $Space, , UseErrorLevel
   if ErrorLevel in 5,6
@@ -92,58 +81,57 @@ $+^#Right::StepToDesktop(1, True)
   Else
     HotKey, $Space, Toggle
 Return
+
 SendClick:
   Send {Click}
 Return
 
 
+
 ; === Open sndvol.exe with Shift-Win-g. 
+; Win-g -> XBoxGameBar
+; ms-settings:apps-volume
+; sndvol.exe
+
+; ms-settings:apps-volume is oddly slow to open and has a bloated interface if you only want the volume
+; sliders. sndvol.exe has about the right features. As does the GameBar, which funnily opens its whole overlay
+; faster than the ms-settings app. Like the temporary overlay thing with widgets. Better than widgets on
+; the desktop itself...
+;
 ; Inspired by XBox Game Overlay (Win-g), but will start the sndvol.exe app and close it when
-; it loses focus. 
-; Loop wait for an active window that is deactivated and close it. Will work reliably however
-; the app is started....
-$^#g::Run sndvol.exe
-CloseSndvolOnInactivate:
+; it loses focus... and just to see how it could be done. Use the GameBar or ms-settings:apps-volume
+; anyways. Perhaps if moving to midscreen and expanding width some to make app volume sliders immediatly accessable
+; will increase the useability factor some. 
+;
+; Loop wait for an active window that is deactivated and close it. Will work "reliably" in any way
+; the app is started... Taking PID from Run's 4th argument will not work as it does not correspond to 
+; the process / windows immediatly. So lets just match on exe instead instead of nice reference. 
+; WinMove will act on "Last ""Found"" Window", that should be the one set by WinWaitActivate, so we
+; don't have to titlematch which i never understood was a prefered way with own parameter...
+; Set width to half that of the screen and center the window. Height is fixed and Y pos find so we can omit them. 
+;
+; Does at times seem to not close on NotActive transition and leave a thread forever waiting... WioWait -> MinMove works
+; sometimes...
+$^#g::
+  Run sndvol.exe
   WinWaitActive, ahk_exe SndVol.exe
+  WinMove,,,A_ScreenWidth/4,,A_ScreenWidth/2
+Return
+
+CloseSndvolOnInactivate:
   WinWaitNotActive, ahk_exe SndVol.exe
   WinClose
 Return
 
 
-; === Scroll Wheel Over Notification Area Speaker Icon Changes Volume
-; Must be a trivial way to do this without the if and function, but, works and... I originally wanted
-; the snippet to run only if the pointer waforevers over the speaker icon to add scroll volume chaning to that
-; (as most linux desktop managers do since the dawn of time and is damn convenient imo) but Win11 TrayNotifyWnd1
-;
-; Windows 11 changed controlclassnn needed for this script to "TrayNotifyWnd1"... from something... maybe akin to
-; "ToolbarWindow322". Don't grok, although I've tried... =)
-;
-; But, just read that the scroll-wheel-over-notification-area-speaker-icon function has been added to Win11
-; _finally_, some other that I and 4 people of similar mind had suggested this, so UserVoice suggestions is't
-; piped to /dev/null afterall... even requests for features that almost nobody wants... go figure...
-;
-#If IsPointerOverTray()
-$WheelUp::Send {Volume_Up}
-$WheelDown::Send {Volume_Down}
-
-IsPointerOverTray()
-{
-  MouseGetPos,,,,controlclassnn,1
-  ; MsgBox, %controlclassnn%  ; If the control name changes again uncomment this for a while and look up and right
-  return controlclassnn=="TrayNotifyWnd1"
-}
-
-
-; === Virtual desktop switch on mouse 4-5 and wheel up/down over task bar
+; === Virtual desktop switch on mouse 4-5 and wheel up/down over task bar, 
+; TODO: make wheel alt-tab switch instead... Shift-Alt-Tab actually cycles, 
+; individual Alt-Tabs switches between last window and current. 
 #If IsPointerOverTaskBar()
-$WheelUp::
-$XButton1::
-  StepToDesktop(-1, False)
-Return
-$WheelDown::
-$XButton2::
-  StepToDesktop(1, False)
-Return
+$WheelUp::!Tab
+$XButton1::StepToDesktop(-1, False)
+$WheelDown::+!Tab
+$XButton2::StepToDesktop(1, False)
 
 IsPointerOverTaskBar()
 {

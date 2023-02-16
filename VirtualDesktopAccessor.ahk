@@ -1,9 +1,6 @@
 ; === Some virtual desktop helper methods to avoid the WS_EX_TOOLWINDOW hack
 ; See the VirtualDesktopAccessor project for details. The Interface ID's seems to change between windows versions so 
 ; be prepared to update... Some methods belong to the IVirtualDesktopManagerInternal interface...
-hwnd:=WinExist("ahk_pid " . DllCall("GetCurrentProcessId", "Uint"))
-hwnd+=0x1000<<32
-
 hVirtualDesktopAccessor := DllCall("LoadLibrary", Str, A_ScriptDir . "\Lib\VirtualDesktopAccessor.dll", "Ptr") 
 GoToDesktopNumberProc := DllCall("GetProcAddress", Ptr, hVirtualDesktopAccessor, AStr, "GoToDesktopNumber", "Ptr")
 GetCurrentDesktopNumberProc := DllCall("GetProcAddress", Ptr, hVirtualDesktopAccessor, AStr, "GetCurrentDesktopNumber", "Ptr")
