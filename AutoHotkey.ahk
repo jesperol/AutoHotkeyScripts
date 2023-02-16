@@ -124,9 +124,26 @@ CloseSndvolOnInactivate:
 Return
 
 
+; === Mouse wheel over tray controls volume
+; Now native (has pepaps been since long back), next function overrides that though. And as an added bonus we get the 
+; OSD indicator popup that native function will not show (but, you propable look at mouse pointer anywas and see volume
+; in tooltip text.)
+#If IsPointerOverTray()
+$WheelUp::Send {Volume_Up}
+$WheelDown::Send {Volume_Down}
+
+IsPointerOverTray()
+{
+  MouseGetPos,,,,controlclassnn,1
+  ; MsgBox, %controlclassnn%  ; If the control name changes again uncomment this for a while and look up and right
+  return controlclassnn=="TrayNotifyWnd1"
+}
+
 ; === Virtual desktop switch on mouse 4-5 and wheel up/down over task bar, 
 ; TODO: make wheel alt-tab switch instead... Shift-Alt-Tab actually cycles, 
 ; individual Alt-Tabs switches between last window and current. 
+; We cannot have this as it will override screll over speaker icon volume
+; change functionallity, unless readding the old ahk method from prior commit. 
 #If IsPointerOverTaskBar()
 $WheelUp::!Tab
 $XButton1::StepToDesktop(-1, False)
