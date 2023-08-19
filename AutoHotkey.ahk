@@ -19,9 +19,6 @@ SetWorkingDir %A_ScriptDir%
 
 DetectHiddenWindows, On
 
-; Run every 250, will not reenter so function will be always active practically 
-SetTimer, CloseSndvolOnInactivate
-
 ; Disable contexts for Hotkeys, both those defined by :: syntax and Hotkey method. Place context sensitive hotkeys
 ; below the non-context sensitive in the script.
 HotKey, If
@@ -30,14 +27,6 @@ HotKey, If
 ; === VirtualDesktopAccessor.dll, Calls and Functions
 ; imports TogglePinnedWindow() and StepToDesktop(steps, moveActive)
 #Include VirtualDesktopAccessor.ahk
-
-; === Let's map capslock to esc
-; if I ever start using that in editors... and let Shift + Capslock act as caps lock.
-+CapsLock::CapsLock
-$CapsLock::Esc
-
-; === Open Notebook Directory in Code (Shift-Alt-n)
-+!n::Run, code.exe ., C:\Users\mignon\OneDrive\Documents\Notes
 
 ; === Toggle AlwaysOnTop
 ; Let's make Alt-F3 toggle active window's "AlwaysOnTop" property (wtf, they have one but it is not
@@ -74,55 +63,17 @@ $+^#Right::StepToDesktop(1, True)
 ; On Shift-F1 check if hotkey Shift-Space is defined, else define it as "SendClick:". If defined 
 ; toggle it on/off. Originally for "Space to spin" function emulation for those games that ltacked
 ; that option. Seems to work with e.g. ELK / NYX games, but not Leander's for some reason. 
-+F1::
-  Hotkey, $Space, , UseErrorLevel
-  if ErrorLevel in 5,6
-    HotKey, $Space, SendClick
-  Else
-    HotKey, $Space, Toggle
-Return
+;+F1::
+;  Hotkey, $Space, , UseErrorLevel
+;  if ErrorLevel in 5,6
+;    HotKey, $Space, SendClick
+;  Else
+;    HotKey, $Space, Toggle
+;Return
 
 SendClick:
   Send {Click}
 Return
-
-
-
-; === Open sndvol.exe with Shift-Win-g. 
-; Win-g -> XBoxGameBar
-; ms-settings:apps-volume
-; sndvol.exe
-
-; ms-settings:apps-volume is oddly slow to open and has a bloated interface if you only want the volume
-; sliders. sndvol.exe has about the right features. As does the GameBar, which funnily opens its whole overlay
-; faster than the ms-settings app. Like the temporary overlay thing with widgets. Better than widgets on
-; the desktop itself...
-;
-; Inspired by XBox Game Overlay (Win-g), but will start the sndvol.exe app and close it when
-; it loses focus... and just to see how it could be done. Use the GameBar or ms-settings:apps-volume
-; anyways. Perhaps if moving to midscreen and expanding width some to make app volume sliders immediatly accessable
-; will increase the useability factor some. 
-;
-; Loop wait for an active window that is deactivated and close it. Will work "reliably" in any way
-; the app is started... Taking PID from Run's 4th argument will not work as it does not correspond to 
-; the process / windows immediatly. So lets just match on exe instead instead of nice reference. 
-; WinMove will act on "Last ""Found"" Window", that should be the one set by WinWaitActivate, so we
-; don't have to titlematch which i never understood was a prefered way with own parameter...
-; Set width to half that of the screen and center the window. Height is fixed and Y pos find so we can omit them. 
-;
-; Does at times seem to not close on NotActive transition and leave a thread forever waiting... WioWait -> MinMove works
-; sometimes...
-$^#g::
-  Run sndvol.exe
-  WinWaitActive, ahk_exe SndVol.exe
-  WinMove,,,A_ScreenWidth/4,,A_ScreenWidth/2
-Return
-
-CloseSndvolOnInactivate:
-  WinWaitNotActive, ahk_exe SndVol.exe
-  WinClose
-Return
-
 
 ; === Mouse wheel over tray controls volume
 ; Now native (has pepaps been since long back), next function overrides that though. And as an added bonus we get the 
